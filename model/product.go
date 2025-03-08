@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func AddCloth(c *fiber.Ctx)(*Product,error){
+func AddProduct(c *fiber.Ctx)(*Product,error){
 	product := Product{BaseModel: BaseModel{ID: uuid.New()}}
 
 	//get request body
@@ -38,11 +38,11 @@ func AddCloth(c *fiber.Ctx)(*Product,error){
 update cloth
 @parans clothe_id
 */
-func UpdateClothe(c *fiber.Ctx, clothe_id uuid.UUID)(*Product, error){
+func UpdateProduct(c *fiber.Ctx, product_id uuid.UUID)(*Product, error){
 	product := new(Product)
 	body := Product{}
 	//find the clothe
-	err := db.First(product,"id = ?",clothe_id).Error
+	err := db.First(product,"id = ?",product_id).Error
 	if err != nil{
 		log.Println("error finding product for the update:",err.Error())
 		return nil, errors.New("failed to update clothe")
@@ -67,16 +67,16 @@ func UpdateClothe(c *fiber.Ctx, clothe_id uuid.UUID)(*Product, error){
 delete clothe
 @params clothe_id
 */
-func DeleteClothe(c *fiber.Ctx, clothe_id uuid.UUID)error{
-	clothe := new(Product)
+func DeleteProduct(c *fiber.Ctx, product_id uuid.UUID)error{
+	product := new(Product)
 	//get clothe
-	if err := db.First(clothe, "id = ?",clothe_id).Error; err != nil{
+	if err := db.First(product, "id = ?",product_id).Error; err != nil{
 		log.Println("error finding clothe for deleting:",err.Error())
 		return errors.New("failed to delete clothe")
 	}
 
 	//delete clothe
-	if err := db.Delete(clothe).Error; err != nil{
+	if err := db.Delete(product).Error; err != nil{
 		log.Println("error deleting clothe:",err.Error())
 		return errors.New("failed to delete clothe")
 	}
@@ -87,50 +87,50 @@ func DeleteClothe(c *fiber.Ctx, clothe_id uuid.UUID)error{
 /*
 gets all the clothes
 */
-func GetAllClothes() (*[]Product, error) {
-	var clothes []Product
+func GetAllProducts() (*[]Product, error) {
+	var products []Product
 
 	// Get all clothes
-	if err := db.Find(&clothes).Error; err != nil {
+	if err := db.Find(&products).Error; err != nil {
 		log.Println("error fetching clothes:", err.Error())
 		return nil, errors.New("failed to fetch clothes")
 	}
 
 	// Shuffle clothes to return different values on each refresh
 	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(clothes), func(i, j int) {
-		clothes[i], clothes[j] = clothes[j], clothes[i]
+	rand.Shuffle(len(products), func(i, j int) {
+		products[i], products[j] = products[j], products[i]
 	})
 
-	return &clothes, nil
+	return &products, nil
 }
 
 /*
 gets clothes by price
 @params price
 */
-func GetClothesByPrice(price float64) (*[]Product, error) {
-	var clothes []Product
+func GetProductsByPrice(price float64) (*[]Product, error) {
+	var products []Product
 	// Query the database for clothes with price less than or equal to the given price
-	if err := db.Where("price <= ?", price).Find(&clothes).Error; err != nil {
+	if err := db.Where("price <= ?", price).Find(&products).Error; err != nil {
 		log.Println("error fetching clothes by price:", err.Error())
 		return nil, errors.New("failed to get clothes by price")
 	}
 
 	// Shuffle the clothes slice to return them in random order
 	rand.Seed(time.Now().UnixNano()) // Seed the random number generator
-	rand.Shuffle(len(clothes), func(i, j int) {
-		clothes[i], clothes[j] = clothes[j], clothes[i]
+	rand.Shuffle(len(products), func(i, j int) {
+		products[i], products[j] = products[j], products[i]
 	})
 
-	return &clothes, nil
+	return &products, nil
 }
 
 /*
 gets clothes by gender
 @params gender
 */
-func GetClothesByGender(gender string) (*[]Product, error) {
+func GetProductsByGender(gender string) (*[]Product, error) {
 	var product []Product
 	// Query the database for clothes with the specified gender
 	if err := db.Where("gender = ?", gender).Find(&product).Error; err != nil {
@@ -151,21 +151,21 @@ func GetClothesByGender(gender string) (*[]Product, error) {
 gets clothes by category
 @params category
 */
-func GetClothesByCategory(category string) (*[]Product, error) {
-	var clothes []Product
+func GetProductsByCategory(category string) (*[]Product, error) {
+	var products []Product
 	// Query the database for clothes with the specified category
-	if err := db.Where("category = ?", category).Find(&clothes).Error; err != nil {
+	if err := db.Where("category = ?", category).Find(&products).Error; err != nil {
 		log.Println("error fetching clothes by category:", err.Error())
 		return nil, errors.New("failed to get clothes by category")
 	}
 
 	// Shuffle the clothes slice to return them in random order
 	rand.Seed(time.Now().UnixNano()) // Seed the random number generator
-	rand.Shuffle(len(clothes), func(i, j int) {
-		clothes[i], clothes[j] = clothes[j], clothes[i]
+	rand.Shuffle(len(products), func(i, j int) {
+		products[i], products[j] = products[j], products[i]
 	})
 
-	return &clothes, nil
+	return &products, nil
 }
 
 
@@ -173,24 +173,24 @@ func GetClothesByCategory(category string) (*[]Product, error) {
 search clothes by various attributes
 @params searchQuery
 */
-func SearchClothes(searchQuery string) (*[]Product, error) {
-	var clothes []Product
+func SearchProducts(searchQuery string) (*[]Product, error) {
+	var products []Product
 	// Use a case-insensitive search for the search query
 	searchQuery = strings.ToLower(searchQuery)
 	
 	// Query the database to find clothes that match the search query in the name or description
-	if err := db.Where("LOWER(name) LIKE ? OR LOWER(description) LIKE ?", "%"+searchQuery+"%", "%"+searchQuery+"%").Find(&clothes).Error; err != nil {
+	if err := db.Where("LOWER(name) LIKE ? OR LOWER(description) LIKE ?", "%"+searchQuery+"%", "%"+searchQuery+"%").Find(&products).Error; err != nil {
 		log.Println("error searching clothes:", err.Error())
 		return nil, errors.New("failed to search clothes")
 	}
 
 	// Shuffle the clothes slice to return them in random order
 	rand.Seed(time.Now().UnixNano()) // Seed the random number generator
-	rand.Shuffle(len(clothes), func(i, j int) {
-		clothes[i], clothes[j] = clothes[j], clothes[i]
+	rand.Shuffle(len(products), func(i, j int) {
+		products[i], products[j] = products[j], products[i]
 	})
 
-	return &clothes, nil
+	return &products, nil
 }
 
 /*
