@@ -12,8 +12,8 @@ import (
 	"github.com/google/uuid"
 )
 
-func AddCloth(c *fiber.Ctx)(*Clothe,error){
-	cloth := Clothe{BaseModel: BaseModel{ID: uuid.New()}}
+func AddCloth(c *fiber.Ctx)(*Product,error){
+	cloth := Product{BaseModel: BaseModel{ID: uuid.New()}}
 
 	//get request body
 	if err := c.BodyParser(&cloth); err != nil{
@@ -38,9 +38,9 @@ func AddCloth(c *fiber.Ctx)(*Clothe,error){
 update cloth
 @parans clothe_id
 */
-func UpdateClothe(c *fiber.Ctx, clothe_id uuid.UUID)(*Clothe, error){
-	clothe := new(Clothe)
-	body := Clothe{}
+func UpdateClothe(c *fiber.Ctx, clothe_id uuid.UUID)(*Product, error){
+	clothe := new(Product)
+	body := Product{}
 	//find the clothe
 	err := db.First(clothe,"id = ?",clothe_id).Error
 	if err != nil{
@@ -68,7 +68,7 @@ delete clothe
 @params clothe_id
 */
 func DeleteClothe(c *fiber.Ctx, clothe_id uuid.UUID)error{
-	clothe := new(Clothe)
+	clothe := new(Product)
 	//get clothe
 	if err := db.First(clothe, "id = ?",clothe_id).Error; err != nil{
 		log.Println("error finding clothe for deleting:",err.Error())
@@ -87,8 +87,8 @@ func DeleteClothe(c *fiber.Ctx, clothe_id uuid.UUID)error{
 /*
 gets all the clothes
 */
-func GetAllClothes() (*[]Clothe, error) {
-	var clothes []Clothe
+func GetAllClothes() (*[]Product, error) {
+	var clothes []Product
 
 	// Get all clothes
 	if err := db.Find(&clothes).Error; err != nil {
@@ -109,8 +109,8 @@ func GetAllClothes() (*[]Clothe, error) {
 gets clothes by price
 @params price
 */
-func GetClothesByPrice(price float64) (*[]Clothe, error) {
-	var clothes []Clothe
+func GetClothesByPrice(price float64) (*[]Product, error) {
+	var clothes []Product
 	// Query the database for clothes with price less than or equal to the given price
 	if err := db.Where("price <= ?", price).Find(&clothes).Error; err != nil {
 		log.Println("error fetching clothes by price:", err.Error())
@@ -130,8 +130,8 @@ func GetClothesByPrice(price float64) (*[]Clothe, error) {
 gets clothes by gender
 @params gender
 */
-func GetClothesByGender(gender string) (*[]Clothe, error) {
-	var clothes []Clothe
+func GetClothesByGender(gender string) (*[]Product, error) {
+	var clothes []Product
 	// Query the database for clothes with the specified gender
 	if err := db.Where("gender = ?", gender).Find(&clothes).Error; err != nil {
 		log.Println("error fetching clothes by gender:", err.Error())
@@ -151,8 +151,8 @@ func GetClothesByGender(gender string) (*[]Clothe, error) {
 gets clothes by category
 @params category
 */
-func GetClothesByCategory(category string) (*[]Clothe, error) {
-	var clothes []Clothe
+func GetClothesByCategory(category string) (*[]Product, error) {
+	var clothes []Product
 	// Query the database for clothes with the specified category
 	if err := db.Where("category = ?", category).Find(&clothes).Error; err != nil {
 		log.Println("error fetching clothes by category:", err.Error())
@@ -173,8 +173,8 @@ func GetClothesByCategory(category string) (*[]Clothe, error) {
 search clothes by various attributes
 @params searchQuery
 */
-func SearchClothes(searchQuery string) (*[]Clothe, error) {
-	var clothes []Clothe
+func SearchClothes(searchQuery string) (*[]Product, error) {
+	var clothes []Product
 	// Use a case-insensitive search for the search query
 	searchQuery = strings.ToLower(searchQuery)
 	
@@ -197,9 +197,9 @@ func SearchClothes(searchQuery string) (*[]Clothe, error) {
 search and filter clothes by category and sort by price
 @params category, minPrice, maxPrice, sortBy
 */
-func SearchAndFilterClothes(category string, minPrice, maxPrice float64, sortBy string) (*[]Clothe, error) {
-	var clothes []Clothe
-	query := db.Model(&Clothe{})
+func SearchAndFilterClothes(category string, minPrice, maxPrice float64, sortBy string) (*[]Product, error) {
+	var clothes []Product
+	query := db.Model(&Product{})
 
 	// Apply category filter if specified
 	if category != "" {
@@ -223,7 +223,6 @@ func SearchAndFilterClothes(category string, minPrice, maxPrice float64, sortBy 
 	default:
 		query = query.Order("created_at DESC") // Default sorting
 	}
-
 	// Fetch the filtered and sorted results
 	if err := query.Find(&clothes).Error; err != nil {
 		log.Println("error searching and filtering clothes:", err.Error())

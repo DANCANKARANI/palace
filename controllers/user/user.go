@@ -33,3 +33,15 @@ func UpdateUserHandler(c *fiber.Ctx)error{
 	return utilities.ShowSuccess(c,"user updated successfully",fiber.StatusOK,response)
 }
 
+//make admin handler
+// func MakeAdminHandler(c *fiber.Ctx)error{
+// 	id, err := uuid.Parse(c.Query("id"))
+// 	if err != nil{
+// 		return utilities.ShowError(c,err.Error(),fiber.StatusInternalServerError)
+// 	}
+	
+// 	err = model.MakeAdmin(c,id)
+// 	if err != nil{
+// 		return utilities.ShowError(c, err.Error(),fiber.StatusInternalServerError)
+// 	}
+// }

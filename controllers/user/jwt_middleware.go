@@ -4,7 +4,7 @@ import (
 	"log"
 	"strings"
 
-	middleware "github.com/dancankarani/palace/moddleware"
+	middleware "github.com/dancankarani/palace/middleware"
 	"github.com/dancankarani/palace/utilities"
 	"github.com/gofiber/fiber/v2"
 )

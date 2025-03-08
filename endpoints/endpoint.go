@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"github.com/dancankarani/palace/routes/carts"
 	"github.com/dancankarani/palace/routes/clothes"
 	"github.com/dancankarani/palace/routes/users"
 	"github.com/gofiber/fiber/v2"
@@ -18,7 +19,7 @@ func CreateEndpoint() {
 	}))
 	users.SetUserRoutes(app)
 	clothes.SetClothesRoutes(app)
-
+	carts.SetCartRoutes(app)
 	//port
-	app.Listen(":3000")
+	app.Listen(":8000")
 }

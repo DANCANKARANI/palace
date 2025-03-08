@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 
+	"github.com/dancankarani/palace/database"
 	"github.com/dancankarani/palace/endpoints"
-	"github.com/dancankarani/palace/model"
 )
 
 func main() {
-	fmt.Println("hello world")
-	model.MigrateDB()
-	endpoints.CreateEndpoint()
+	fmt.Println(".....")
+    endpoints.CreateEndpoint()
+    database.ConnectDB()
 }

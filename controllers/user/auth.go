@@ -3,7 +3,7 @@ package user
 import (
 	"time"
 
-	"github.com/dancankarani/palace/moddleware"
+	"github.com/dancankarani/palace/middleware"
 	"github.com/dancankarani/palace/model"
 	"github.com/dancankarani/palace/utilities"
 	"github.com/gofiber/fiber/v2"
@@ -37,7 +37,7 @@ func Login(c *fiber.Ctx)error{
 	}
 	exp :=time.Hour*24
 	//generating token
-	tokenString,err := middleware.GenerateToken(middleware.Claims{UserID: &existingUser.ID,Role: "normal"},exp)
+	tokenString,err := middleware.GenerateToken(middleware.Claims{UserID: &existingUser.ID,Role: "customer"},exp)
 	if err != nil{
 		return utilities.ShowError(c,err.Error(),fiber.StatusInternalServerError)
 	}

@@ -2,7 +2,7 @@ package user
 
 import (
 	"time"
-	"github.com/dancankarani/palace/moddleware"
+	"github.com/dancankarani/palace/middleware"
 	"github.com/dancankarani/palace/utilities"
 	"github.com/gofiber/fiber/v2"
 )

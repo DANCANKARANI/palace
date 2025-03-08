@@ -37,7 +37,7 @@ func GenerateToken(claims Claims,expiration_time time.Duration) (string, error) 
 	my_secret_key := LoadSecretKey()
 	claims.StandardClaims = jwt.StandardClaims{
 		ExpiresAt: time.Now().Add(expiration_time).Unix(),
-		Issuer:    "qvp",
+		Issuer:    "pentabyte",
 		
 	}
 

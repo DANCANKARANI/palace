@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"log"
 
 	"github.com/dancankarani/palace/utilities"
 	"github.com/gofiber/fiber/v2"
@@ -111,4 +112,25 @@ func MapUserToResponse(user User) ResponseUser {
         PhoneNumber: user.PhoneNumber,
         Email:       user.Email,
     }
+}
+
+func MakeAdmin(c *fiber.Ctx,id uuid.UUID)error{
+	user := new(User)
+	
+	//find user with this id
+	err := db.First(&user,"id = ?",id).Error
+	if err != nil{
+		err_str := "user with this id "+id.String()+" was not found"
+		log.Println(err_str+":",err.Error())
+		return errors.New(err_str)
+	}
+
+	//add role admin to user
+	user.UserRole="admin"
+	err = db.Save(&user).Error
+	if err != nil{
+		log.Println("error saving user",err.Error())
+		return errors.New("failed to make user admin")
+	}
+	return nil
 }
