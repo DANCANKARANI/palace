@@ -12,7 +12,7 @@ import (
 func JWTMiddleware(c *fiber.Ctx) error {
     // Check for token in cookies first
     tokenString := c.Cookies("Authorization")
-
+    log.Println(tokenString)
     // If not found in cookies, check the Authorization header
     if tokenString == "" {
         authHeader := c.Get("Authorization")

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 
@@ -14,6 +15,7 @@ import (
 func SaveFile(c *fiber.Ctx, fieldName string) (string, error) {
 	file, err := c.FormFile(fieldName)
 	if err != nil {
+		log.Println(err.Error())
 		return "", err
 	}
 
@@ -42,6 +44,7 @@ func SaveFile(c *fiber.Ctx, fieldName string) (string, error) {
 
 	_, err = azblob.UploadStreamToBlockBlob(context.Background(), src, blobURL, azblob.UploadStreamToBlockBlobOptions{})
 	if err != nil {
+		log.Println("error uploading file:",err.Error())
 		return "", errors.New("failed to upload file")
 	}
 
