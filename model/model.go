@@ -35,16 +35,10 @@ type Product struct {
     Name        string  `json:"name" gorm:"size:255"`
     Description string  `json:"description" gorm:"type:text"`
     Price       float64 `json:"price" gorm:"type:decimal(10,2)"`
-    Size        string  `json:"size" gorm:"size:50"`    // Example: S, M, L, XL
-    Color       string  `json:"color" gorm:"size:50"`
-    Gender      string  `json:"gender" gorm:"size:20"`  // Example: Male, Female, Unisex
-    Category    string  `json:"category" gorm:"size:100"` // Example: Shirts, Trousers, etc.
+   	Category    string  `json:"category" gorm:"size:100"` // Example: Shirts, Trousers, etc.
     Stock       int     `json:"stock"`                  // Available stock count
     ImageURL    string  `json:"image_url" gorm:"size:255"` // URL for the clothing item image
-    Brand       string  `json:"brand" gorm:"size:100"`  // Clothing brand
-    Material    string  `json:"material" gorm:"size:100"` // Example: Cotton, Polyester
     IsActive    bool    `json:"is_active" gorm:"default:true"` // Active status for display
-
     OrderItems  []OrderItem `gorm:"foreignKey:ProductID;constraint:onUpdate:CASCADE,onDelete:SET NULL"`
     CartItems   []CartItem  `gorm:"foreignKey:ProductID;constraint:onUpdate:CASCADE,onDelete:SET NULL"`
 }

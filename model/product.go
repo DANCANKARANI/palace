@@ -13,25 +13,25 @@ import (
 )
 
 func AddCloth(c *fiber.Ctx)(*Product,error){
-	cloth := Product{BaseModel: BaseModel{ID: uuid.New()}}
+	product := Product{BaseModel: BaseModel{ID: uuid.New()}}
 
 	//get request body
-	if err := c.BodyParser(&cloth); err != nil{
-		log.Println("error parsing cloth body request:",err.Error())
+	if err := c.BodyParser(&product); err != nil{
+		log.Println("error parsing product body request:",err.Error())
 		return nil, errors.New("error parsing request data")
 	}
 	url, err := utilities.SaveFile(c,"image")
 	if err != nil{
 		return nil, errors.New(err.Error())
 	}
-	cloth.ImageURL = url
+	product.ImageURL = url
 	//add to database
-	if err := db.Create(&cloth).Error; err != nil{
+	if err := db.Create(&product).Error; err != nil{
 		log.Println("error adding cloth:",err.Error())
 		return nil, errors.New("failed to add cloth")
 	}
 
-	return &cloth,nil
+	return &product,nil
 }
 
 /*
@@ -39,12 +39,12 @@ update cloth
 @parans clothe_id
 */
 func UpdateClothe(c *fiber.Ctx, clothe_id uuid.UUID)(*Product, error){
-	clothe := new(Product)
+	product := new(Product)
 	body := Product{}
 	//find the clothe
-	err := db.First(clothe,"id = ?",clothe_id).Error
+	err := db.First(product,"id = ?",clothe_id).Error
 	if err != nil{
-		log.Println("error finding clothe for the update:",err.Error())
+		log.Println("error finding product for the update:",err.Error())
 		return nil, errors.New("failed to update clothe")
 	}
 
@@ -54,13 +54,13 @@ func UpdateClothe(c *fiber.Ctx, clothe_id uuid.UUID)(*Product, error){
 		return nil,errors.New("failed to parse request body")
 	}
 	//update clothe
-	if err = db.Model(clothe).Updates(&body).Error; err != nil{
+	if err = db.Model(product).Updates(&body).Error; err != nil{
 		log.Println("failed to update clothe:",err.Error())
 		return nil, errors.New("failed to update clothe")
 	}
 
 	//return
-	return clothe,nil
+	return product,nil
 }
 
 /*
@@ -131,20 +131,20 @@ gets clothes by gender
 @params gender
 */
 func GetClothesByGender(gender string) (*[]Product, error) {
-	var clothes []Product
+	var product []Product
 	// Query the database for clothes with the specified gender
-	if err := db.Where("gender = ?", gender).Find(&clothes).Error; err != nil {
+	if err := db.Where("gender = ?", gender).Find(&product).Error; err != nil {
 		log.Println("error fetching clothes by gender:", err.Error())
 		return nil, errors.New("failed to get clothes by gender")
 	}
 
 	// Shuffle the clothes slice to return them in random order
 	rand.Seed(time.Now().UnixNano()) // Seed the random number generator
-	rand.Shuffle(len(clothes), func(i, j int) {
-		clothes[i], clothes[j] = clothes[j], clothes[i]
+	rand.Shuffle(len(product), func(i, j int) {
+		product[i], product[j] = product[j], product[i]
 	})
 
-	return &clothes, nil
+	return &product, nil
 }
 
 /*

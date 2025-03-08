@@ -63,7 +63,7 @@ func CreateUserAccount(c *fiber.Ctx) error {
 
 	userModel := model.User{ BaseModel: model.BaseModel{
         ID: id, 
-    },FullName: user.FullName,Email: user.Email,PhoneNumber: user.PhoneNumber,Password: hashed_password,ResetCode: "",}
+    },FullName: user.FullName,Email: user.Email,PhoneNumber: user.PhoneNumber,Password: hashed_password,ResetCode: "",UserRole: user.UserRole,}
 	//create user
 	userModel.CodeExpirationTime=time.Now()
 
