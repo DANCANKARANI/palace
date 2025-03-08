@@ -12,8 +12,9 @@ func SetProductsRoutes(app *fiber.App) {
 	auth.Get("/price",products.GetProductsByPriceHandler)
 	auth.Get("/category",products.GetProductsByCategory)
 	//protected routes
-	clotheGroup := auth.Group("/",user.JWTMiddleware)
-	clotheGroup.Post("/",products.AddProductHandler)
-	clotheGroup.Patch("/:id",products.UpdateProductHandler)
-	clotheGroup.Delete("/:id",products.DeleteProductHandler)
+	productGroup := auth.Group("/",user.JWTMiddleware)
+	productGroup.Get("/:id",products.GetSellersProductHandler)
+	productGroup.Post("/",products.AddProductHandler)
+	productGroup.Patch("/:id",products.UpdateProductHandler)
+	productGroup.Delete("/:id",products.DeleteProductHandler)
 }

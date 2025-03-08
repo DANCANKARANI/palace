@@ -59,3 +59,12 @@ func GetProductsByCategory(c *fiber.Ctx)error{
 	}
 	return utilities.ShowSuccess(c,"successfull retrieved clothes by category",fiber.StatusOK,response)
 }
+
+func GetSellersProductHandler(c *fiber.Ctx)error{
+	id, _:=uuid.Parse(c.Params("id"))
+	response,err := model.GetSellersProduct(id)
+	if err != nil{
+		return utilities.ShowError(c,err.Error(),fiber.StatusInternalServerError)
+	}
+	return utilities.ShowSuccess(c,"seller's products retrieved successfully",fiber.StatusOK,response)
+}

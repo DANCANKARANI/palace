@@ -27,6 +27,7 @@ type User struct {
 	ResetCode  string `json:"reset_code" gorm:"size:10"`
 	CodeExpirationTime time.Time	`json:"code_expiration_time"`
     Order       []Order `gorm:"foreignKey:UserID;references:ID;constraint:onUpdate:CASCADE,onDelete:SET NULL"`
+	Products 	[]Product `gorm:"foreignKey:SellerID;references:ID;constraint:onUpdate:CASCADE,onDelete:SET NULL"` // One-to-Many relationship
 }
 
 
@@ -39,6 +40,7 @@ type Product struct {
     Stock       int     `json:"stock"`                  // Available stock count
     ImageURL    string  `json:"image_url" gorm:"size:255"` // URL for the clothing item image
     IsActive    bool    `json:"is_active" gorm:"default:true"` // Active status for display
+	SellerID    uuid.UUID  `json:"seller_id" gorm:"type:uuid;index"` // Foreign key to associate with Seller
     OrderItems  []OrderItem `gorm:"foreignKey:ProductID;constraint:onUpdate:CASCADE,onDelete:SET NULL"`
     CartItems   []CartItem  `gorm:"foreignKey:ProductID;constraint:onUpdate:CASCADE,onDelete:SET NULL"`
 }

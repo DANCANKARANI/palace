@@ -13,8 +13,10 @@ import (
 )
 
 func AddProduct(c *fiber.Ctx)(*Product,error){
-	product := Product{BaseModel: BaseModel{ID: uuid.New()}}
-
+	user_id,_:= GetAuthUserID(c)
+	log.Println(user_id)
+	product := Product{BaseModel: BaseModel{ID: uuid.New()},SellerID: user_id}
+	
 	//get request body
 	if err := c.BodyParser(&product); err != nil{
 		log.Println("error parsing product body request:",err.Error())
@@ -236,4 +238,22 @@ func SearchAndFilterClothes(category string, minPrice, maxPrice float64, sortBy 
 	})
 
 	return &clothes, nil
+}
+
+// GetSellersProduct fetches all products associated with a specific seller
+func GetSellersProduct(sellerID uuid.UUID) (*[]Product, error) {
+	var products []Product
+
+	// Query the database for products with the given sellerID
+	result := db.Where("seller_id = ?", sellerID).Find(&products)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	// If no products are found, return an empty slice
+	if result.RowsAffected == 0 {
+		return &products, nil
+	}
+
+	return &products, nil
 }
