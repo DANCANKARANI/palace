@@ -22,7 +22,7 @@ func UpdateProductHandler(c *fiber.Ctx)error{
 	if err != nil{
 		return utilities.ShowError(c,err.Error(),fiber.StatusInternalServerError)
 	}
-	return utilities.ShowSuccess(c,"clothes updated successfully",fiber.StatusOK, clothe)
+	return utilities.ShowSuccess(c,"product updated successfully",fiber.StatusOK, clothe)
 }
 
 func GetAllProductsHandler(c *fiber.Ctx)error{
@@ -30,7 +30,7 @@ func GetAllProductsHandler(c *fiber.Ctx)error{
 	if err != nil{
 		return utilities.ShowError(c, err.Error(),fiber.StatusInternalServerError)
 	}
-	return utilities.ShowSuccess(c,"clothes retrieved successfully",fiber.StatusOK,response)
+	return utilities.ShowSuccess(c,"product retrieved successfully",fiber.StatusOK,response)
 }
 
 func DeleteProductHandler(c *fiber.Ctx)error{
@@ -48,7 +48,7 @@ func GetProductsByPriceHandler(c *fiber.Ctx)error{
 	if err != nil{
 		return utilities.ShowError(c,err.Error(),fiber.StatusInternalServerError)
 	}
-	return utilities.ShowSuccess(c,"retrieved clothes by price",fiber.StatusOK,response)
+	return utilities.ShowSuccess(c,"retrieved products by price",fiber.StatusOK,response)
 }
 
 func GetProductsByCategory(c *fiber.Ctx)error{
@@ -61,7 +61,7 @@ func GetProductsByCategory(c *fiber.Ctx)error{
 }
 
 func GetSellersProductHandler(c *fiber.Ctx)error{
-	id, _:=uuid.Parse(c.Params("id"))
+	id, _:= model.GetAuthUserID(c)
 	response,err := model.GetSellersProduct(id)
 	if err != nil{
 		return utilities.ShowError(c,err.Error(),fiber.StatusInternalServerError)

@@ -24,7 +24,7 @@ func Login(c *fiber.Ctx)error{
 	}
 
 	//check of user exist
-	userExist,existingUser,_:= model.UserExist(c,user.PhoneNumber)
+	userExist,existingUser,_:= model.UserExist(c,user.PhoneNumber,user.UserRole)
 	if ! userExist {
 		return utilities.ShowError(c,"user does not exist",fiber.StatusNotFound)
 	}

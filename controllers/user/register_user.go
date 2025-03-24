@@ -41,7 +41,7 @@ func CreateUserAccount(c *fiber.Ctx) error {
 		return utilities.ShowError(c,errStr,fiber.StatusConflict)
 	}
 	//Check if user exist
-	userExist,_,err:= model.UserExist(c,user.PhoneNumber)
+	userExist,_,err:= model.UserExist(c,user.PhoneNumber,user.UserRole)
 	if err != nil{
 		return utilities.ShowError(c,err.Error(),fiber.StatusInternalServerError)
 	}

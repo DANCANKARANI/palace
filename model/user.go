@@ -62,14 +62,7 @@ func UpdateUser(c *fiber.Ctx) (*ResponseUser, error) {
 		if err != nil{
 			return nil, err
 		}
-		exist,_,err:=UserExist(c,body.PhoneNumber)
-		if err != nil{
-			return nil, err
-		}
-		if exist{
-			err_str := "user with phone:"+body.PhoneNumber+" already exist"
-			return nil, errors.New(err_str)
-		}
+		
 	}
 
 	//validate email

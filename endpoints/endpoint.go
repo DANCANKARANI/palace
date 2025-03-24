@@ -2,7 +2,9 @@ package endpoints
 
 import (
 	"github.com/dancankarani/palace/routes/carts"
+	"github.com/dancankarani/palace/routes/orders"
 	"github.com/dancankarani/palace/routes/product"
+	"github.com/dancankarani/palace/routes/service"
 	"github.com/dancankarani/palace/routes/users"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -20,6 +22,8 @@ func CreateEndpoint() {
 	users.SetUserRoutes(app)
 	product.SetProductsRoutes(app)
 	carts.SetCartRoutes(app)
+	orders.SetOrdersRoutes(app)
+	service.SetServicesRoutes(app)
 	//port
 	app.Listen(":8000")
 }

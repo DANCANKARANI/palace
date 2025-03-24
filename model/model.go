@@ -14,62 +14,92 @@ type BaseModel struct {
 }
 type User struct {
     BaseModel
-    FullName   string `json:"full_name" gorm:"size:255"`
-    Email      string `json:"email" gorm:"size:100;unique"`
-    Password   string `json:"password" gorm:"size:255"`
-    Address    string `json:"address" gorm:"size:255"`
-    City       string `json:"city" gorm:"size:100"`
-    PostalCode string `json:"postal_code" gorm:"size:20"`
-    Location   string `json:"location" gorm:"size:100"`
-    PhoneNumber      string `json:"phone_number" gorm:"size:20"`
-    UserRole   string `json:"user_role" gorm:"size:50;default:'customer'"` // Can be 'customer', 'admin', etc.
-    IsActive   bool   `json:"is_active" gorm:"default:true"`
-	ResetCode  string `json:"reset_code" gorm:"size:10"`
-	CodeExpirationTime time.Time	`json:"code_expiration_time"`
-    Order       []Order `gorm:"foreignKey:UserID;references:ID;constraint:onUpdate:CASCADE,onDelete:SET NULL"`
-	Products 	[]Product `gorm:"foreignKey:SellerID;references:ID;constraint:onUpdate:CASCADE,onDelete:SET NULL"` // One-to-Many relationship
+    FullName         string    `json:"full_name" gorm:"size:255"`
+    Email            string    `json:"email" gorm:"size:100;unique"`
+    Password         string    `json:"password" gorm:"size:255"`
+    Address          string    `json:"address" gorm:"size:255"`
+    City             string    `json:"city" gorm:"size:100"`
+    PostalCode       string    `json:"postal_code" gorm:"size:20"`
+    Location         string    `json:"location" gorm:"size:100"`
+    PhoneNumber      string    `json:"phone_number" gorm:"size:20"`
+    UserRole         string    `json:"user_role" gorm:"size:50;default:'customer'"` // Can be 'customer', 'admin', etc.
+    IsActive         bool      `json:"is_active" gorm:"default:true"`
+    ResetCode        string    `json:"reset_code" gorm:"size:10"`
+    CodeExpirationTime time.Time `json:"code_expiration_time"`
+	Services         []Service `gorm:"foreignKey:SellerID;references:ID;constraint:onUpdate:CASCADE,onDelete:SET NULL"` // One-to-Many relationship
+    Orders           []Order   `gorm:"foreignKey:UserID;references:ID;constraint:onUpdate:CASCADE,onDelete:SET NULL"`
+    Products         []Product `gorm:"foreignKey:SellerID;references:ID;constraint:onUpdate:CASCADE,onDelete:SET NULL"` // One-to-Many relationship
 }
 
 
 type Product struct {
     BaseModel
-    Name        string  `json:"name" gorm:"size:255"`
-    Description string  `json:"description" gorm:"type:text"`
-    Price       float64 `json:"price" gorm:"type:decimal(10,2)"`
-   	Category    string  `json:"category" gorm:"size:100"` // Example: Shirts, Trousers, etc.
-    Stock       int     `json:"stock"`                  // Available stock count
-    ImageURL    string  `json:"image_url" gorm:"size:255"` // URL for the clothing item image
-    IsActive    bool    `json:"is_active" gorm:"default:true"` // Active status for display
-	SellerID    uuid.UUID  `json:"seller_id" gorm:"type:uuid;index"` // Foreign key to associate with Seller
+    Name        string    `json:"name" gorm:"size:255"`
+    Description string    `json:"description" gorm:"type:text"`
+    Price       float64   `json:"price" gorm:"type:decimal(10,2)"`
+    Category    string    `json:"category" gorm:"size:100"` // Example: Shirts, Trousers, etc.
+    Stock       int       `json:"stock"`                  // Available stock count
+    ImageURL    string    `json:"image_url" gorm:"size:255"` // URL for the clothing item image
+    IsActive    bool      `json:"is_active" gorm:"default:true"` // Active status for display
+    SellerID    uuid.UUID `json:"seller_id" gorm:"type:uuid;index"` // Foreign key to associate with Seller
+    User      User      `gorm:"foreignKey:SellerID;references:ID"` // Relationship to User
     OrderItems  []OrderItem `gorm:"foreignKey:ProductID;constraint:onUpdate:CASCADE,onDelete:SET NULL"`
     CartItems   []CartItem  `gorm:"foreignKey:ProductID;constraint:onUpdate:CASCADE,onDelete:SET NULL"`
 }
 
+type Service struct {
+    BaseModel
+    Name        string    `json:"name" gorm:"size:255"`
+    Description string    `json:"description" gorm:"type:text"`
+    Price       float64   `json:"price" gorm:"type:decimal(10,2)"`
+    Category    string    `json:"category" gorm:"size:100"` // Example: Graphic Design, Tutoring, etc.
+    IsActive    bool      `json:"is_active" gorm:"default:true"` // Active status for display
+    SellerID    uuid.UUID `json:"seller_id" gorm:"type:uuid;index"` // Foreign key to associate with Seller
+    User        User      `gorm:"foreignKey:SellerID;references:ID"` // Relationship to User
+}
+
 type Order struct {
 	BaseModel
-	OrderNumber   string          `json:"order_number" gorm:"size:100;unique;not null"`
-	UserID        uuid.UUID       `json:"user_id" gorm:"type:varchar(36);not null"`
+	OrderNumber   string          `json:"order_number" gorm:"size:100;unique;"`
+	UserID        uuid.UUID       `json:"user_id" gorm:"index;"`
 	User          User            `json:"user" gorm:"foreignKey:UserID;references:ID;constraint:onUpdate:CASCADE,onDelete:SET NULL"`
 	TotalAmount   float64         `json:"total_amount" gorm:"type:decimal(10,2)"`
-	PaymentStatus string          `json:"payment_status" gorm:"size:50"`
+	PaymentStatus PaymentStatus   `json:"payment_status" gorm:"size:50"`
 	PaymentMethod string          `json:"payment_method" gorm:"size:50"`
 	ShippingAddress string        `json:"shipping_address" gorm:"type:text"`
-	OrderStatus   string          `json:"order_status" gorm:"size:50"`
-	DeliveredAt   *time.Time      `json:"delivered_at"`
+	OrderStatus   OrderStatus     `json:"order_status" gorm:"size:50"`
+	DeliveredAt   *time.Time     `json:"delivered_at"`
 	Items         []OrderItem     `json:"items" gorm:"foreignKey:OrderID;constraint:onUpdate:CASCADE,onDelete:CASCADE"`
 }
 
 type OrderItem struct {
 	BaseModel
-	OrderID     uuid.UUID  `json:"order_id" gorm:"type:varchar(36);"`
+	OrderID     uuid.UUID  `json:"order_id" gorm:"index;"`
 	Order       Order      `json:"order" gorm:"foreignKey:OrderID;references:ID;constraint:onUpdate:CASCADE,onDelete:CASCADE"`
-	ProductID   uuid.UUID  `json:"product_id" gorm:"type:varchar(36);"`
+	ProductID   uuid.UUID  `json:"product_id" gorm:"index;"`
 	Product     Product    `json:"product" gorm:"foreignKey:ProductID;references:ID;constraint:onUpdate:CASCADE,onDelete:SET NULL"`
 	Quantity    int        `json:"quantity" gorm:"int"`
 	Price       float64    `json:"price" gorm:"type:decimal(10,2)"`
-	TotalPrice  float64    `json:"total_price" gorm:"type:decimal(10,2)"`
+	TotalPrice  float64    `json:"total_price" gorm:"type:decimal(10,2)"` // Optional: Can be calculated dynamically
 }
 
+// PaymentStatus and OrderStatus enums
+type PaymentStatus string
+
+const (
+	PaymentPending PaymentStatus = "Pending"
+	PaymentPaid    PaymentStatus = "Paid"
+	PaymentFailed  PaymentStatus = "Failed"
+)
+
+type OrderStatus string
+
+const (
+	OrderProcessing OrderStatus = "Processing"
+	OrderShipped    OrderStatus = "Shipped"
+	OrderDelivered  OrderStatus = "Delivered"
+	OrderCancelled  OrderStatus = "Cancelled"
+)
 type Cart struct {
 	BaseModel
 	UserID        uuid.UUID     `json:"user_id" gorm:"type:varchar(36);"` // Reference to the user who owns the cart

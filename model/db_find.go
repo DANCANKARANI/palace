@@ -19,16 +19,17 @@ finds user using phone number only
 @params phone_number
 */
 
-func UserExist(c *fiber.Ctx, phoneNumber string) (bool, *User, error) {
+func UserExist(c *fiber.Ctx, phoneNumber, userRole string) (bool, *User, error) {
     var existingUser User
 
     // Detailed logging
-    log.Printf("Checking for user with phone number: %s", phoneNumber)
+    log.Printf("Checking for user with phone number: %s and role: %s", phoneNumber, userRole)
 
-    result := db.Where("phone_number = ?", phoneNumber).First(&existingUser)
+    // Query the database for a user with the given phone number and user role
+    result := db.Where("phone_number = ? AND user_role = ?", phoneNumber, userRole).First(&existingUser)
     if result.Error != nil {
         // Log the detailed error
-        log.Printf("Error finding user with phone number %s: %v", phoneNumber, result.Error)
+        log.Printf("Error finding user with phone number %s and role %s: %v", phoneNumber, userRole, result.Error)
 
         if errors.Is(result.Error, gorm.ErrRecordNotFound) {
             return false, nil, nil
@@ -36,7 +37,9 @@ func UserExist(c *fiber.Ctx, phoneNumber string) (bool, *User, error) {
 
         return false, nil, fmt.Errorf("database error: %v", result.Error)
     }
-	log.Printf("User found: %+v", existingUser)
+
+    // Log the found user
+    log.Printf("User found: %+v", existingUser)
     return true, &existingUser, nil
 }
 /*

@@ -13,9 +13,8 @@ func SetUserRoutes(app *fiber.App) {
 	userGroup := auth.Group("/",user.JWTMiddleware)
 	userGroup.Get("/all",user.GetAllUsersHandler)
 	userGroup.Get("/",user.GetOneUserHandler)
-	userGroup.Patch("/:id",user.UpdateUserHandler)
+	userGroup.Put("/",user.UpdateUserHandler)
 	userGroup.Post("/forgot-password",user.ForgotPassword)
 	userGroup.Post("/reset-password",user.ResetPassword)
 	userGroup.Post("/logout",user.Logout)
-	userGroup.Patch("/",user.UpdateUserHandler)
 }

@@ -9,19 +9,36 @@ import (
 	"gorm.io/gorm"
 )
 
-func AddCart(c *fiber.Ctx,product_id uuid.UUID) (*CartItem, error) {
-    userID, _ := GetAuthUserID(c)
-    log.Println(userID)
+func AddCart(c *fiber.Ctx, productID uuid.UUID) (*CartItem, error) {
+    userID, err := GetAuthUserID(c)
+    if err != nil {
+        log.Println("Error retrieving user ID:", err.Error())
+        return nil, fiber.NewError(fiber.StatusUnauthorized, "unauthorized")
+    }
+
     // Parse the request body to get CartItem data
     var cartItem CartItem
     if err := c.BodyParser(&cartItem); err != nil {
-        log.Println("Error parsing cart items request:", err.Error())
-        return nil, errors.New("failed to read request data")
+        log.Println("Error parsing cart item request:", err.Error())
+        return nil, fiber.NewError(fiber.StatusBadRequest, "invalid request data")
     }
+
+    // Validate cart item fields
+    if cartItem.Quantity <= 0 || cartItem.Price <= 0 {
+        return nil, fiber.NewError(fiber.StatusBadRequest, "quantity and price must be greater than 0")
+    }
+
+    // Start a database transaction
+    tx := db.Begin()
+    defer func() {
+        if r := recover(); r != nil {
+            tx.Rollback()
+        }
+    }()
 
     // Find the user's cart or create a new cart if it doesn't exist
     var cart Cart
-    if err := db.Where("user_id = ?", userID).First(&cart).Error; err != nil {
+    if err := tx.Where("user_id = ?", userID).First(&cart).Error; err != nil {
         if err == gorm.ErrRecordNotFound {
             // Create a new cart if not found
             cart = Cart{
@@ -29,46 +46,46 @@ func AddCart(c *fiber.Ctx,product_id uuid.UUID) (*CartItem, error) {
                 UserID:      userID,
                 TotalAmount: 0, // Initialize to 0
             }
-            if err := db.Create(&cart).Error; err != nil {
+            if err := tx.Create(&cart).Error; err != nil {
                 log.Println("Error creating new cart:", err.Error())
-                return nil, errors.New("failed to create cart")
+                return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to create cart")
             }
         } else {
             // Return other database errors
             log.Println("Error retrieving cart:", err.Error())
-            return nil, errors.New("failed to retrieve cart")
+            return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to retrieve cart")
         }
     }
 
-    // Set the CartID for the CartItem
-    cartItem.ProductID = product_id
-
-    // Calculate TotalPrice for the cart item
-    cartItem.TotalPrice = float64(cartItem.Quantity) * cartItem.Price
+    // Create the cart item
+    cartItem = CartItem{
+        BaseModel:  BaseModel{ID: uuid.New()},
+        CartID:     cart.ID,
+        ProductID:  productID,
+        Quantity:   cartItem.Quantity,
+        Price:      cartItem.Price,
+        TotalPrice: float64(cartItem.Quantity) * cartItem.Price,
+    }
 
     // Add the cart item to the database
-    cartItem = CartItem{ BaseModel:   BaseModel{ID: uuid.New()},CartID:cart.ID,ProductID: product_id,Quantity: cartItem.Quantity,Price: cartItem.Price,TotalPrice: cartItem.TotalPrice}
-    if err := db.Create(&cartItem).Error; err != nil {
+    if err := tx.Create(&cartItem).Error; err != nil {
         log.Println("Error adding cart item:", err.Error())
-        return nil, errors.New("failed to add cart item")
+        tx.Rollback()
+        return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to add cart item")
     }
 
     // Update cart total amount
-    var cartItems []CartItem
-    if err := db.Model(&cart).Association("Items").Find(&cartItems); err != nil {
-        log.Println("Error retrieving cart items:", err.Error())
-        return nil, errors.New("failed to retrieve cart items")
-    }
-
-    totalAmount := 0.0
-    for _, item := range cartItems {
-        totalAmount += item.TotalPrice
-    }
-    cart.TotalAmount = totalAmount
-
-    if err := db.Save(&cart).Error; err != nil {
+    cart.TotalAmount += cartItem.TotalPrice
+    if err := tx.Save(&cart).Error; err != nil {
         log.Println("Error updating cart total amount:", err.Error())
-        return nil, errors.New("failed to update cart total amount")
+        tx.Rollback()
+        return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to update cart total amount")
+    }
+
+    // Commit the transaction
+    if err := tx.Commit().Error; err != nil {
+        log.Println("Error committing transaction:", err.Error())
+        return nil, fiber.NewError(fiber.StatusInternalServerError, "failed to complete transaction")
     }
 
     return &cartItem, nil
