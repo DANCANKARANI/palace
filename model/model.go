@@ -14,21 +14,30 @@ type BaseModel struct {
 }
 type User struct {
     BaseModel
-    FullName         string    `json:"full_name" gorm:"size:255"`
-    Email            string    `json:"email" gorm:"size:100;unique"`
-    Password         string    `json:"password" gorm:"size:255"`
-    Address          string    `json:"address" gorm:"size:255"`
-    City             string    `json:"city" gorm:"size:100"`
-    PostalCode       string    `json:"postal_code" gorm:"size:20"`
-    Location         string    `json:"location" gorm:"size:100"`
-    PhoneNumber      string    `json:"phone_number" gorm:"size:20"`
-    UserRole         string    `json:"user_role" gorm:"size:50;default:'customer'"` // Can be 'customer', 'admin', etc.
-    IsActive         bool      `json:"is_active" gorm:"default:true"`
-    ResetCode        string    `json:"reset_code" gorm:"size:10"`
-    CodeExpirationTime time.Time `json:"code_expiration_time"`
-	Services         []Service `gorm:"foreignKey:SellerID;references:ID;constraint:onUpdate:CASCADE,onDelete:SET NULL"` // One-to-Many relationship
-    Orders           []Order   `gorm:"foreignKey:UserID;references:ID;constraint:onUpdate:CASCADE,onDelete:SET NULL"`
-    Products         []Product `gorm:"foreignKey:SellerID;references:ID;constraint:onUpdate:CASCADE,onDelete:SET NULL"` // One-to-Many relationship
+    FirstName        string     `json:"first_name" gorm:"size:255;not null"`
+    LastName         string     `json:"last_name" gorm:"size:255;not null"`
+    Email            string     `json:"email" gorm:"size:100;unique;not null" validate:"required,email"`
+    Password         string     `json:"-" gorm:"size:255;not null"` // Hidden from JSON
+    Address          string     `json:"address" gorm:"size:255"`
+    City             string     `json:"city" gorm:"size:100"`
+    PostalCode       string     `json:"postal_code" gorm:"size:20"`
+    Location         string     `json:"location" gorm:"size:100"`
+    PhoneNumber      string     `json:"phone_number" gorm:"size:20" validate:"omitempty,numeric"`
+    UserRole         string     `json:"user_role" gorm:"size:50;default:'customer';not null" validate:"oneof=customer admin seller"`
+    IsActive         bool       `json:"is_active" gorm:"default:true"`
+    ResetCode        string     `json:"-" gorm:"size:10"` // Hidden from JSON
+    CodeExpirationTime time.Time `json:"-"` // Hidden from JSON
+    
+    // Relationships
+    Services         []Service  `json:"services,omitempty" gorm:"foreignKey:SellerID"`
+    Orders           []Order    `json:"orders,omitempty" gorm:"foreignKey:UserID"`
+    Products         []Product  `json:"products,omitempty" gorm:"foreignKey:SellerID"`
+    
+    // As a seller receiving ratings
+    SellerRatings    []Rating   `json:"seller_ratings,omitempty" gorm:"foreignKey:SellerID"`
+    
+    // As a buyer giving ratings
+    GivenRatings     []Rating   `json:"given_ratings,omitempty" gorm:"foreignKey:UserID"`
 }
 
 
@@ -120,17 +129,37 @@ type CartItem struct {
 }
 
 type Payment struct {
-	ID              uuid.UUID  `json:"id" gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
-	PaymentMethod   string     `json:"payment_method" gorm:"type:varchar(100)"`  // e.g., M-Pesa, PayPal, Credit Card
-	Amount          float64    `json:"amount" gorm:"type:decimal(10,2)"`         // The payment amount
-	Status          string     `json:"status" gorm:"type:varchar(100)"`          // Status of the payment (e.g., Pending, Completed, Failed)
-	TransactionID   string     `json:"transaction_id" gorm:"type:varchar(100)"`  // Unique transaction ID from the payment gateway
-	PhoneNumber     string     `json:"phone_number" gorm:"type:varchar(15)"`     // Payer's phone number (especially for mobile payments like M-Pesa)
-	PaymentDate     time.Time  `json:"payment_date" gorm:"type:timestamp"`       // Date and time of the payment
-	OrderID         uuid.UUID  `json:"order_id" gorm:"type:uuid"`                // Associated order ID
-	MerchantRequestID string   `json:"merchant_request_id" gorm:"type:varchar(100)"` // Request ID from M-Pesa (optional)
-	ResultCode      int        `json:"result_code" gorm:"type:int"`              // Result code from payment provider (e.g., 0 for success)
-	ResultMessage   string     `json:"result_message" gorm:"type:varchar(255)"`  // Message or description of the transaction result
-	CreatedAt       time.Time  `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt       time.Time  `json:"updated_at" gorm:"autoUpdateTime"`
+	ID              uuid.UUID `json:"id" gorm:"type:varchar(36);primaryKey;"` // Unique identifier for the payment
+	BillingID       uuid.UUID `json:"billing_id" gorm:"type:varchar(36)"` // Foreign key to the Billing table
+	CustomerID       uuid.UUID `json:"patient_id" gorm:"type:varchar(36)"` // Foreign key to the Patients table
+	Cost            float64   `json:"cost" gorm:"type:decimal(10,2);"`        // Cost of the payment
+	PaymentMethod   string    `json:"payment_method" gorm:"type:varchar(50);"` // Payment method (e.g., M-Pesa, Credit Card)
+	TransactionID   string    `json:"transaction_id" gorm:"type:varchar(100);"` // Transaction ID from the payment gateway
+	PaymentStatus   string    `json:"payment_status" gorm:"type:varchar(50);"` // Payment status (e.g., Pending, Completed, Failed)
+	CallbackURL     string    `json:"callback_url" gorm:"type:varchar(255);"`  // Callback URL for payment notifications
+	CustomerPhone   string    `json:"customer_phone" gorm:"type:varchar(20);"` // Customer's phone number
+	CustomerName    string    `json:"customer_name" gorm:"type:varchar(100);"` // Customer's name
+	AccountReference string   `json:"account_reference" gorm:"type:varchar(100);"` // Account reference (e.g., order ID)
+	TransactionDesc string    `json:"transaction_desc" gorm:"type:varchar(255);"` // Transaction description	
+	TransactionDate string	  `json:"transaction_date" gorm:"type:varchar(255);"`
+	CreatedAt       time.Time `json:"created_at" gorm:"type:timestamp;default:CURRENT_TIMESTAMP;"` // Timestamp when the payment was created
+	UpdatedAt       time.Time `json:"updated_at" gorm:"type:timestamp;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;"` // Timestamp when the payment was last updated
+	// Relationships
 }
+
+//ratings
+type Rating struct {
+	ID        uuid.UUID      `json:"id" gorm:"type:varchar(36);primary_key"`
+	SellerID   uuid.UUID      `json:"seller_id" gorm:"type:varchar(36);"` // Reference to seller
+    UserID    uuid.UUID      `json:"user_id" gorm:"type:varchar(36);"`   // Who left the rating
+    Stars      int            `json:"stars" gorm:"not null;check:stars>=1 AND stars<=5"`
+    Comment    string         `json:"comment" gorm:"type:text"`                  // Optional feedback
+	User       User           `json:"user" gorm:"foreignKey:UserID;references:ID"`
+    
+    // If you also want to include seller details:
+    Seller     User           `json:"seller" gorm:"foreignKey:SellerID;references:ID"`
+    CreatedAt  time.Time      `json:"created_at" gorm:"autoCreateTime"`
+    UpdatedAt  time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
+    DeletedAt  gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+}
+

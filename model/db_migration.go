@@ -3,11 +3,13 @@ package model
 func MigrateDB(){
 	db.AutoMigrate(
 		&User{},
+		&Rating{},
 		&Product{},
 		&Order{},
 		&Service{},
-		OrderItem{},
-		Cart{},
-		CartItem{},
+		&OrderItem{},
+		&Cart{},
+		&CartItem{},
+		&Payment{},
 	)
 }

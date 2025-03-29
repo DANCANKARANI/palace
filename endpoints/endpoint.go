@@ -3,6 +3,7 @@ package endpoints
 import (
 	"github.com/dancankarani/palace/routes/carts"
 	"github.com/dancankarani/palace/routes/orders"
+	"github.com/dancankarani/palace/routes/payments"
 	"github.com/dancankarani/palace/routes/product"
 	"github.com/dancankarani/palace/routes/service"
 	"github.com/dancankarani/palace/routes/users"
@@ -24,6 +25,7 @@ func CreateEndpoint() {
 	carts.SetCartRoutes(app)
 	orders.SetOrdersRoutes(app)
 	service.SetServicesRoutes(app)
+	payments.SetPaymentsRoutes(app)
 	//port
 	app.Listen(":8000")
 }

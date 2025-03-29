@@ -35,5 +35,5 @@ func ForgotPassword(c *fiber.Ctx) error {
 	//send the code password reset code
 	go utilities.SendEmail(user.Email,code,exp_time)
 	
-	return utilities.ShowSuccess(c,"link sent to your email",fiber.StatusOK,User{found_user.FullName,found_user.Email,found_user.PhoneNumber})
+	return utilities.ShowSuccess(c,"link sent to your email",fiber.StatusOK,User{found_user.FirstName,found_user.Email,found_user.PhoneNumber})
 }

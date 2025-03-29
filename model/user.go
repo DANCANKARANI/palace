@@ -14,7 +14,7 @@ gets user using user ID
 */
 type ResponseUser struct{
 	ID uuid.UUID 		`json:"id"`
-	FullName string 	`json:"full_name"`
+	FirstName string 	`json:"first_name"`
 	PhoneNumber string 	`json:"phone_number"`
 	Email string 		`json:"email"`
 	ProfilePhotoPath string	`json:"profile_photo_path"`
@@ -101,7 +101,7 @@ func UpdateUser(c *fiber.Ctx) (*ResponseUser, error) {
 func MapUserToResponse(user User) ResponseUser {
     return ResponseUser{
         ID:          user.ID,
-        FullName:    user.FullName,
+        FirstName:    user.FirstName,
         PhoneNumber: user.PhoneNumber,
         Email:       user.Email,
     }

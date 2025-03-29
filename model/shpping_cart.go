@@ -91,6 +91,42 @@ func AddCart(c *fiber.Ctx, productID uuid.UUID) (*CartItem, error) {
     return &cartItem, nil
 }
 
+//get cart items for a specific user
+// 
+func GetCartItems(c *fiber.Ctx) error {
+	// Get user ID from JWT claims
+	userID, err := GetAuthUserID(c)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Invalid user ID",
+		})
+	}
+
+
+	// Query cart with items and preload product details
+	var cart Cart
+	result := db.Preload("Items.Product").
+		Where("user_id = ?", userID).
+		First(&cart)
+
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Cart not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch cart",
+		})
+	}
+
+	// Calculate totals for response (without saving to DB)
+	for i := range cart.Items {
+		cart.Items[i].TotalPrice = cart.Items[i].Price * float64(cart.Items[i].Quantity)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(cart)
+}
 /*
 removes cart items
 @params cart_item_id
