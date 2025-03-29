@@ -13,5 +13,6 @@ func SetCartRoutes(app *fiber.App) {
 	cartGroup := auth.Group("/",user.JWTMiddleware)
 	cartGroup.Post("/:id",cart.AddCart)
 	cartGroup.Get("/",model.GetCartItems)
+	cartGroup.Delete("/",model.ClearCart)
 	cartGroup.Delete("/:id/remove",cart.RemoveCartItem)
 }

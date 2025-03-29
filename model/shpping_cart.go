@@ -169,3 +169,19 @@ func UpdateCart(c *fiber.Ctx, cart_item_id uuid.UUID)(*CartItem,error){
 	}
 	return cartItem,nil
 }
+
+func ClearCart(c *fiber.Ctx)error{
+    cart := new(Cart)
+    user_id,_ := GetAuthUserID(c)
+	if err := db.First(cart,"user_id = ?",user_id).Error; err != nil{
+		log.Println("error getting cart item:",err.Error())
+		return errors.New("failed to clear cart")
+	}
+
+	//delete
+	if err :=db.Delete(cart).Error; err != nil{
+		log.Println("error clearing:",err.Error())
+		return errors.New("error clear cart")
+	}
+	return nil
+}

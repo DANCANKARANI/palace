@@ -42,6 +42,7 @@ import (
 
 	// Create order
 	order := Order{
+		BaseModel: BaseModel{ID: uuid.New()},
 		OrderNumber:   generateOrderNumber(),
 		UserID:        userID,
 		TotalAmount:   totalAmount,
