@@ -97,7 +97,7 @@ func GetCartItems(c *fiber.Ctx) error {
 	// Get user ID from JWT claims
 	userID, err := GetAuthUserID(c)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"error": "Invalid user ID",
 		})
 	}
@@ -111,9 +111,7 @@ func GetCartItems(c *fiber.Ctx) error {
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"error": "Cart not found",
-			})
+			return c.Status(fiber.StatusNotFound).JSON(cart)
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to fetch cart",

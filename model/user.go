@@ -17,6 +17,7 @@ type ResponseUser struct{
 	FirstName string 	`json:"first_name"`
 	PhoneNumber string 	`json:"phone_number"`
 	Email string 		`json:"email"`
+	UserRole string		`json:"user_role"`
 	ProfilePhotoPath string	`json:"profile_photo_path"`
 }
 

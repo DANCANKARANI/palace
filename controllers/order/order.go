@@ -1,6 +1,8 @@
 package order
 
 import (
+
+
 	"github.com/dancankarani/palace/model"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -54,3 +56,4 @@ func MakeOrderHandler(c *fiber.Ctx) error {
 	// Return the created order
 	return c.Status(fiber.StatusCreated).JSON(order)
 }
+

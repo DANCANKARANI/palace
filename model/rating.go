@@ -78,7 +78,7 @@ func CreateRatings(c *fiber.Ctx) error {
 // @Router /ratings [get]
 func GetRatings(c *fiber.Ctx) error {
     // Initialize query
-    query := db.Model(&Rating{}).Preload("User") // Assuming you want to include user details
+    query := db.Model(&Rating{}).Preload("User").Preload("Seller") // including user details
 
     // Get query parameters
     sellerID := c.Query("seller_id")
